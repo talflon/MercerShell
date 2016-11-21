@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
@@ -100,10 +100,10 @@ public class MercerShellServer {
     protected void handleClient(Socket socket) throws IOException {
         handleClient(
                 new BufferedReader(new InputStreamReader(socket.getInputStream())),
-                new PrintWriter(socket.getOutputStream(), true));
+                new PrintStream(socket.getOutputStream(), true));
     }
 
-    protected void handleClient(BufferedReader in, PrintWriter out) throws IOException {
+    protected void handleClient(BufferedReader in, PrintStream out) throws IOException {
         MercerShell shell = new MercerShell(in, out);
         shell.readLoop();
     }

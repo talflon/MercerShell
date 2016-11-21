@@ -11,7 +11,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
@@ -66,7 +66,7 @@ public class MercerShellServerTest {
         shellServer = new MercerShellServer(
                 12345, threadFactory, mockServerSocketFactory) {
             @Override
-            protected void handleClient(BufferedReader in, PrintWriter out) throws IOException {
+            protected void handleClient(BufferedReader in, PrintStream out) throws IOException {
                 out.println(in.readLine());
             }
 

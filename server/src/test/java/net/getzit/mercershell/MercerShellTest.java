@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -32,7 +33,7 @@ public class MercerShellTest {
         PipedOutputStream pipeOut = new PipedOutputStream();
         shell = new MercerShell(
                 new BufferedReader(new InputStreamReader(new PipedInputStream(pipeOut))),
-                new PrintWriter(new PipedOutputStream(pipeIn), true));
+                new PrintStream(new PipedOutputStream(pipeIn), true));
         shellOut = new BufferedReader(new InputStreamReader(pipeIn));
         shellIn = new PrintWriter(new OutputStreamWriter(pipeOut), true);
         executor.submit(new Callable<Object>() {

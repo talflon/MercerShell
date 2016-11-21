@@ -2,19 +2,19 @@ package net.getzit.mercershell;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.PrintStream;
 
 import bsh.Interpreter;
 
 public class MercerShell {
     private final BufferedReader in;
-    private final PrintWriter out;
+    private final PrintStream out;
     private final Interpreter shell;
 
-    public MercerShell(BufferedReader in, PrintWriter out) {
+    public MercerShell(BufferedReader in, PrintStream out) {
         this.in = in;
         this.out = out;
-        shell = new Interpreter();
+        shell = new Interpreter(in, out, out, false);
     }
 
     public Interpreter getShell() {
