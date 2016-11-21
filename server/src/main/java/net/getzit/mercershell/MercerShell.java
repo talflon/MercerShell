@@ -7,14 +7,18 @@ import java.io.PrintWriter;
 import bsh.Interpreter;
 
 public class MercerShell {
-    private BufferedReader in;
-    private PrintWriter out;
-    private Interpreter shell;
+    private final BufferedReader in;
+    private final PrintWriter out;
+    private final Interpreter shell;
 
     public MercerShell(BufferedReader in, PrintWriter out) {
         this.in = in;
         this.out = out;
         shell = new Interpreter();
+    }
+
+    public Interpreter getShell() {
+        return shell;
     }
 
     public void readLoop() throws IOException {
