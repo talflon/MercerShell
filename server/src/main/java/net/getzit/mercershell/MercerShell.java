@@ -32,7 +32,9 @@ public class MercerShell {
             }
             try {
                 Object result = shell.eval(line);
-                displayResult(result);
+                if (result != null) {
+                    displayResult(result);
+                }
             } catch (Throwable t) {
                 displayError(t);
             }

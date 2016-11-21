@@ -122,6 +122,26 @@ public class MercerShellTest {
     public void testPrint() throws Exception {
         shellIn.println("print(\"hello\");");
         assertOutput("hello");
+    }
+
+    @Test
+    public void testPrintNoJunkValue() throws Exception {
+        shellIn.println("print(\"hello\");");
+        assertOutput("hello");
+        shellIn.println("12");
+        assertOutput("12");
+    }
+
+    @Test
+    public void testSwallowNull() throws Exception {
+        shellIn.println("null");
+        shellIn.println("\"Q\"");
+        assertOutput("Q");
+    }
+
+    @Test
+    public void testPrintNull() throws Exception {
+        shellIn.println("print(null)");
         assertOutput("null");
     }
 }
