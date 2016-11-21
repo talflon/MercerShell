@@ -23,6 +23,9 @@ public class MercerShell {
 
     public void readLoop() throws IOException {
         while (!Thread.interrupted()) {
+            if (out.checkError()) {
+                throw new IOException("Error in output stream");
+            }
             String line = in.readLine();
             if (line == null) {
                 break;

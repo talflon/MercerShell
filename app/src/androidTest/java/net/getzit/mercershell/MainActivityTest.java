@@ -28,6 +28,7 @@ public class MainActivityTest {
             out.println("1+2");
             String result = in.readLine();
             assertEquals("3", result);
+            assertFalse("Error in output stream", out.checkError());
         } finally {
             socket.close();
         }

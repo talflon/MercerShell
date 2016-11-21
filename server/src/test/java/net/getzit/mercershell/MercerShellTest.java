@@ -47,12 +47,15 @@ public class MercerShellTest {
 
     @After
     public void tearDownShell() throws InterruptedException {
+        boolean shellInError = false;
         if (shellIn != null) {
+            shellInError = shellIn.checkError();
             shellIn.close();
             Thread.yield();
         }
         executor.shutdownNow();
         assertTrue("Something still running", executor.awaitTermination(2, TimeUnit.SECONDS));
+        assertFalse("Error in output stream", shellInError);
     }
 
     void testSingleCommand(String input, String expectedOutput) throws Exception {
