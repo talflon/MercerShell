@@ -10,6 +10,7 @@ repositories {
 
 dependencies {
     compile 'org.beanshell:bsh-core:2.0b4'
+    compile 'org.beanshell:bsh-commands:2.0b4'
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.10.19'
 }

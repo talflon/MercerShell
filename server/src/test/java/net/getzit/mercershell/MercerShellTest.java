@@ -60,6 +60,10 @@ public class MercerShellTest {
 
     void testSingleCommand(String input, String expectedOutput) throws Exception {
         shellIn.println(input);
+        assertOutput(expectedOutput);
+    }
+
+    void assertOutput(String expectedOutput) throws Exception {
         Future<String> result = executor.submit(new Callable<String>() {
             @Override
             public String call() throws Exception {
@@ -112,5 +116,12 @@ public class MercerShellTest {
     public void testLocalVariableExternalGet() throws Exception {
         testSingleCommand("y = -1", "-1");
         assertEquals(-1, shell.getShell().get("y"));
+    }
+
+    @Test
+    public void testPrint() throws Exception {
+        shellIn.println("print(\"hello\");");
+        assertOutput("hello");
+        assertOutput("null");
     }
 }
