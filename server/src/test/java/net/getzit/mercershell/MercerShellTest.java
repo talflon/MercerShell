@@ -64,6 +64,10 @@ public class MercerShellTest {
     }
 
     void assertOutput(String expectedOutput) throws Exception {
+        assertEquals(expectedOutput, getOutput());
+    }
+
+    String getOutput() throws Exception {
         Future<String> result = executor.submit(new Callable<String>() {
             @Override
             public String call() throws Exception {
@@ -71,10 +75,15 @@ public class MercerShellTest {
             }
         });
         try {
-            assertEquals(expectedOutput, result.get(2, TimeUnit.SECONDS));
+            return result.get(2, TimeUnit.SECONDS);
         } finally {
             result.cancel(true);
         }
+    }
+
+    void runSingleCommand(String input) throws Exception {
+        shellIn.println(input);
+        getOutput();
     }
 
     @Test
@@ -89,13 +98,17 @@ public class MercerShellTest {
     }
 
     public static class TestPojo {
-        public int publicField;
-        private String privateField;
+        public volatile int publicField;
+        private volatile String privateField;
 
         public TestPojo(int publicField, String privateField) {
             this.publicField = publicField;
             this.privateField = privateField;
         }
+        public TestPojo() { }
+
+        public int getPublicFieldPublic() { return publicField; }
+        public void setPublicFieldPublic(int value) { publicField = value; }
     }
 
     @Test
@@ -103,6 +116,56 @@ public class MercerShellTest {
         testSingleCommand(
                 "new net.getzit.mercershell.MercerShellTest.TestPojo(8, \"x\").publicField",
                 "8");
+    }
+
+    @Test
+    public void testPojoPublicFieldGet() throws Exception {
+        TestPojo pojo = new TestPojo();
+        shell.getShell().set("pojo", pojo);
+        pojo.publicField = 13;
+        testSingleCommand("pojo.publicField", "13");
+    }
+
+    @Test
+    public void testPojoPublicFieldSet() throws Exception {
+        TestPojo pojo = new TestPojo();
+        shell.getShell().set("pojo", pojo);
+        runSingleCommand("pojo.publicField = 43210");
+        assertEquals(43210, pojo.publicField);
+    }
+
+    @Test
+    public void testPojoPrivateFieldGet() throws Exception {
+        shellIn.println("setAccessibility(true)");
+        TestPojo pojo = new TestPojo();
+        shell.getShell().set("pojo", pojo);
+        pojo.privateField = "oi";
+        testSingleCommand("pojo.privateField", "oi");
+    }
+
+    @Test
+    public void testPojoPrivateFieldSet() throws Exception {
+        shellIn.println("setAccessibility(true)");
+        TestPojo pojo = new TestPojo();
+        shell.getShell().set("pojo", pojo);
+        runSingleCommand("pojo.privateField = \"stuff\"");
+        assertEquals("stuff", pojo.privateField);
+    }
+
+    @Test
+    public void testPojoPublicBeanPropGet() throws Exception {
+        TestPojo pojo = new TestPojo();
+        shell.getShell().set("pojo", pojo);
+        pojo.publicField = -100;
+        testSingleCommand("pojo.publicFieldPublic", "-100");
+    }
+
+    @Test
+    public void testPojoPublicBeanPropSet() throws Exception {
+        TestPojo pojo = new TestPojo();
+        shell.getShell().set("pojo", pojo);
+        runSingleCommand("pojo.publicFieldPublic = 5");
+        assertEquals(5, pojo.publicField);
     }
 
     @Test
@@ -114,7 +177,7 @@ public class MercerShellTest {
 
     @Test
     public void testLocalVariableExternalGet() throws Exception {
-        testSingleCommand("y = -1", "-1");
+        runSingleCommand("y = -1");
         assertEquals(-1, shell.getShell().get("y"));
     }
 
