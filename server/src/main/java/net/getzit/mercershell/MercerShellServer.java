@@ -131,8 +131,11 @@ public class MercerShellServer {
     }
 
     protected void handleClient(BufferedReader in, PrintStream out) throws IOException {
-        MercerShell shell = new MercerShell(in, out);
-        shell.readLoop();
+        createShell(in, out).readLoop();
+    }
+
+    protected MercerShell createShell(BufferedReader in, PrintStream out) {
+        return new MercerShell(in, out);
     }
 
     protected void handleClientError(Throwable error, Socket socket) {

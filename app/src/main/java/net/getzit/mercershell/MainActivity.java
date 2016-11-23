@@ -20,10 +20,14 @@ along with MercerShell.  If not, see <http://www.gnu.org/licenses/>.
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.concurrent.Executors;
 
 import javax.net.ServerSocketFactory;
+
+import bsh.EvalError;
 
 public class MainActivity extends AppCompatActivity {
     private MercerShellServer shellServer;
@@ -33,7 +37,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         shellServer = new MercerShellServer(
-                12345, Executors.defaultThreadFactory(), ServerSocketFactory.getDefault());
+                12345, Executors.defaultThreadFactory(), ServerSocketFactory.getDefault()) {
+            @Override
+            protected MercerShell createShell(BufferedReader in, PrintStream out) {
+                MercerShell shell = super.createShell(in, out);
+                try {
+                    shell.getShell().set("activity", MainActivity.this);
+                } catch (EvalError e) {
+                    throw new Error(e);
+                }
+                return shell;
+            }
+        };
         try {
             shellServer.start();
         } catch (IOException e) {
