@@ -155,4 +155,12 @@ public class MercerShellTest extends MercerShellTestHarness {
         shellIn.println("obj() { x = 3; method() { return x; } return this; }");
         testSingleCommand("obj().method()", "3");
     }
+
+    @Test
+    public void testMockitoMockWhen() throws Exception {
+        shellIn.println("import org.mockito.Mockito");
+        runSingleCommand("list = Mockito.mock(List.class)");
+        runSingleCommand("Mockito.when(list.size()).thenReturn(9)");
+        testSingleCommand("list.size()", "9");
+    }
 }
