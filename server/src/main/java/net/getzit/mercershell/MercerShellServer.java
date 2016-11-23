@@ -51,31 +51,41 @@ public class MercerShellServer {
             throw new IllegalStateException();
         }
         serverSocket = serverSocketFactory.createServerSocket(port);
-        serverThread = threadFactory.newThread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    acceptLoop();
-                } catch (InterruptedIOException e) {
-                    /* ignore */
-                } catch (IOException e) {
-                    handleServerError(e);
-                } finally {
+        boolean started = false;
+        try {
+            serverThread = threadFactory.newThread(new Runnable() {
+                @Override
+                public void run() {
                     try {
-                        serverSocket.close();
-                    } catch (IOException e) {
+                        acceptLoop();
+                    } catch (InterruptedIOException e) {
                         /* ignore */
+                    } catch (IOException e) {
+                        handleServerError(e);
+                    } finally {
+                        try {
+                            serverSocket.close();
+                        } catch (IOException e) {
+                            /* ignore */
+                        }
                     }
                 }
+            });
+            serverThread.start();
+            started = true;
+        } finally {
+            if (!started) {
+                serverSocket.close();
             }
-        });
-        serverThread.start();
+        }
     }
 
     public synchronized void stop() {
-        serverThread.interrupt();
-        for (Thread thread : clientThreads) {
-            thread.interrupt();
+        if (serverThread != null) {
+            serverThread.interrupt();
+            for (Thread thread : clientThreads) {
+                thread.interrupt();
+            }
         }
     }
 
