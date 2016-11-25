@@ -32,15 +32,17 @@ import javax.net.ServerSocketFactory;
 
 public class MercerShellServer {
     private final int port;
+    private final MercerShellFactory shellFactory;
     private final ThreadFactory threadFactory;
     private final ServerSocketFactory serverSocketFactory;
     private final Set<Thread> clientThreads;
     private ServerSocket serverSocket;
     private Thread serverThread;
 
-    public MercerShellServer(int port, ThreadFactory threadFactory,
+    public MercerShellServer(int port, MercerShellFactory shellFactory, ThreadFactory threadFactory,
                              ServerSocketFactory serverSocketFactory) {
         this.port = port;
+        this.shellFactory = shellFactory;
         this.threadFactory = threadFactory;
         this.serverSocketFactory = serverSocketFactory;
         clientThreads = new HashSet<>();
@@ -131,11 +133,7 @@ public class MercerShellServer {
     }
 
     protected void handleClient(BufferedReader in, PrintStream out) throws IOException {
-        createShell(in, out).readLoop();
-    }
-
-    protected MercerShell createShell(BufferedReader in, PrintStream out) {
-        return new MercerShell(in, out);
+        shellFactory.createShell(in, out).readLoop();
     }
 
     protected void handleClientError(Throwable error, Socket socket) {

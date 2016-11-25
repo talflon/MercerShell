@@ -24,8 +24,8 @@ import java.io.PrintStream;
 import bsh.Interpreter;
 
 public class MercerShell {
-    private final BufferedReader in;
-    private final PrintStream out;
+    protected final BufferedReader in;
+    protected final PrintStream out;
     private final Interpreter shell;
 
     public MercerShell(BufferedReader in, PrintStream out) {

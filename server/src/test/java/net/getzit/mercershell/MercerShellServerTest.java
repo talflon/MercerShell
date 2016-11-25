@@ -63,13 +63,19 @@ public class MercerShellServerTest {
         ServerSocketFactory mockServerSocketFactory = mock(ServerSocketFactory.class);
         when(mockServerSocketFactory.createServerSocket(anyInt())).thenReturn(mockServerSocket);
 
-        shellServer = new MercerShellServer(
-                12345, threadFactory, mockServerSocketFactory) {
+        MercerShellFactory shellFactory = new MercerShellFactory() {
             @Override
-            protected void handleClient(BufferedReader in, PrintStream out) throws IOException {
-                out.println(in.readLine());
+            public MercerShell createShell(BufferedReader in, PrintStream out) {
+                return new MercerShell(in, out) {
+                    @Override
+                    public void readLoop() throws IOException {
+                        out.println(in.readLine());
+                    }
+                };
             }
-
+        };
+        shellServer = new MercerShellServer(
+                12345, shellFactory, threadFactory, mockServerSocketFactory) {
             @Override
             protected void handleClientError(Throwable error, Socket socket) {
                 handleServerError(error);

@@ -37,10 +37,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         shellServer = new MercerShellServer(
-                12345, Executors.defaultThreadFactory(), ServerSocketFactory.getDefault()) {
+                12345, new MercerShellFactory() {
             @Override
-            protected MercerShell createShell(BufferedReader in, PrintStream out) {
-                MercerShell shell = super.createShell(in, out);
+            public MercerShell createShell(BufferedReader in, PrintStream out) {
+                MercerShell shell = new MercerShell(in, out);
                 try {
                     shell.getShell().set("activity", MainActivity.this);
                 } catch (EvalError e) {
@@ -48,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return shell;
             }
-        };
+        }, Executors.defaultThreadFactory(), ServerSocketFactory.getDefault());
         try {
             shellServer.start();
         } catch (IOException e) {
