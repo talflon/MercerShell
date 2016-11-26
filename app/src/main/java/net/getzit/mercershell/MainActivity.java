@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         shellServer = new MercerShellServer(
-                12345, new MercerShellFactory() {
+                getResources().getInteger(R.integer.server_port), new MercerShellFactory() {
             @Override
             public MercerShell createShell(BufferedReader in, PrintStream out) {
                 MercerShell shell = new MercerShell(in, out);

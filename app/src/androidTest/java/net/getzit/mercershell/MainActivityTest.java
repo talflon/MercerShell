@@ -28,7 +28,8 @@ public class MainActivityTest {
 
     @Before
     public void connectToServer() throws IOException {
-        socket = new Socket("localhost", 12345);
+        int port = mActivityRule.getActivity().getResources().getInteger(R.integer.server_port);
+        socket = new Socket("localhost", port);
         out = new PrintWriter(socket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }
