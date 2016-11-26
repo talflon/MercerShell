@@ -26,6 +26,7 @@ import bsh.Interpreter;
 public class MercerShell {
     public static final String MULTILINE_START = "##";
     public static final String MULTILINE_END = MULTILINE_START;
+    public static final String LAST_RESULT_VAR = "RESULT";
 
     protected final BufferedReader in;
     protected final PrintStream out;
@@ -65,6 +66,7 @@ public class MercerShell {
             try {
                 Object result = shell.eval(line);
                 if (result != null) {
+                    shell.set(LAST_RESULT_VAR, result);
                     displayResult(result);
                 }
             } catch (Throwable t) {

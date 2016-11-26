@@ -192,4 +192,12 @@ public class MercerShellTest extends MercerShellTestHarness {
         shellIn.println(MercerShell.MULTILINE_END);
         assertOutput("24");
     }
+
+    @Test
+    public void testLastResult() throws Exception {
+        runSingleCommand("15");
+        assertEquals(15, shell.getShell().get(MercerShell.LAST_RESULT_VAR));
+        runSingleCommand("\"abc\" + 123");
+        assertEquals("abc123", shell.getShell().get(MercerShell.LAST_RESULT_VAR));
+    }
 }
