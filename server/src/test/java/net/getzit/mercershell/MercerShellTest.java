@@ -200,4 +200,27 @@ public class MercerShellTest extends MercerShellTestHarness {
         runSingleCommand("\"abc\" + 123");
         assertEquals("abc123", shell.getShell().get(MercerShell.LAST_RESULT_VAR));
     }
+
+    @Test
+    public void testMultilineCancel() throws Exception {
+        shellIn.println(MercerShell.MULTILINE_START);
+        shellIn.println("8 + ");
+        shellIn.println(MercerShell.MULTILINE_CANCEL);
+        testSingleCommand("5 - 1", "4");
+    }
+
+    @Test
+    public void testMultilineAfterCancel() throws Exception {
+        shellIn.println(MercerShell.MULTILINE_START);
+        shellIn.println("abcdefg");
+        shellIn.println("hijklmnop");
+        shellIn.println(MercerShell.MULTILINE_CANCEL);
+        runSingleCommand("0");
+        shellIn.println(MercerShell.MULTILINE_START);
+        shellIn.println("print(");
+        shellIn.println("\"this\"");
+        shellIn.println(")");
+        shellIn.println(MercerShell.MULTILINE_END);
+        assertOutput("this");
+    }
 }
