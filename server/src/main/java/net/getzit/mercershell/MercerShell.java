@@ -24,9 +24,13 @@ import java.io.PrintStream;
 import bsh.Interpreter;
 
 public class MercerShell {
+    public static final String MULTILINE_START = "##";
+    public static final String MULTILINE_END = MULTILINE_START;
+
     protected final BufferedReader in;
     protected final PrintStream out;
     private final Interpreter shell;
+    private String cmdBuffer;
 
     public MercerShell(BufferedReader in, PrintStream out) {
         this.in = in;
@@ -46,6 +50,17 @@ public class MercerShell {
             String line = in.readLine();
             if (line == null) {
                 break;
+            } else if (cmdBuffer != null) {
+                if (MULTILINE_END.equals(line)) {
+                    line = cmdBuffer;
+                    cmdBuffer = null;
+                } else {
+                    cmdBuffer += line;
+                    continue;
+                }
+            } else if (MULTILINE_START.equals(line)) {
+                cmdBuffer = "";
+                continue;
             }
             try {
                 Object result = shell.eval(line);

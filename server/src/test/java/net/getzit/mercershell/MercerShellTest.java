@@ -163,4 +163,33 @@ public class MercerShellTest extends MercerShellTestHarness {
         runSingleCommand("Mockito.when(list.size()).thenReturn(9)");
         testSingleCommand("list.size()", "9");
     }
+
+    @Test
+    public void testMultiLineCall() throws Exception {
+        shellIn.println(MercerShell.MULTILINE_START);
+        shellIn.println("Math.pow(");
+        shellIn.println("2.0,");
+        shellIn.println("4.0)");
+        shellIn.println(MercerShell.MULTILINE_END);
+        assertOutput("16.0");
+    }
+
+    @Test
+    public void testMultiLineSet() throws Exception {
+        shellIn.println(MercerShell.MULTILINE_START);
+        shellIn.println("x = ");
+        shellIn.println("  17 ");
+        shellIn.println(MercerShell.MULTILINE_END);
+        getOutput();
+        assertEquals(17, shell.getShell().get("x"));
+    }
+
+    @Test
+    public void testMultiLineMult() throws Exception {
+        shellIn.println(MercerShell.MULTILINE_START);
+        shellIn.println("8");
+        shellIn.println("*3");
+        shellIn.println(MercerShell.MULTILINE_END);
+        assertOutput("24");
+    }
 }
