@@ -26,11 +26,14 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import javax.net.ServerSocketFactory;
 
 public class MercerShellServer {
+    public static final int DEFAULT_PORT = 12345;
+
     private final int port;
     private final MercerShellFactory shellFactory;
     private final ThreadFactory threadFactory;
@@ -142,5 +145,14 @@ public class MercerShellServer {
 
     protected void handleServerError(Throwable error) {
         error.printStackTrace();
+    }
+
+    public static void main(String[] args) throws IOException {
+        new MercerShellServer(
+                DEFAULT_PORT,
+                MercerShell.defaultFactory(),
+                Executors.defaultThreadFactory(),
+                ServerSocketFactory.getDefault()
+        ).start();
     }
 }

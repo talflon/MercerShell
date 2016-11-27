@@ -86,4 +86,13 @@ public class MercerShell {
     protected void displayError(Throwable error) {
         displayResult(error);
     }
+
+    public static MercerShellFactory defaultFactory() {
+        return new MercerShellFactory() {
+            @Override
+            public MercerShell createShell(BufferedReader in, PrintStream out) {
+                return new MercerShell(in, out);
+            }
+        };
+    }
 }

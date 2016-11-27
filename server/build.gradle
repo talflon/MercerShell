@@ -1,12 +1,10 @@
-apply plugin: 'java'
+apply plugin: 'application'
 apply plugin: 'com.github.hauner.jarTest'
+
+mainClassName = 'net.getzit.mercershell.MercerShellServer'
 
 targetCompatibility = '1.7'
 sourceCompatibility = '1.7'
-
-repositories {
-    jcenter()
-}
 
 dependencies {
     compile 'org.beanshell:bsh-core:2.0b4'
