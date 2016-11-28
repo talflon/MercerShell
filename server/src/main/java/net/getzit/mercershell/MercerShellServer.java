@@ -41,6 +41,7 @@ public class MercerShellServer {
     private MercerShellFactory shellFactory = MercerShell.defaultFactory();
     private ThreadFactory threadFactory = Executors.defaultThreadFactory();
     private ServerSocketFactory serverSocketFactory = ServerSocketFactory.getDefault();
+    private boolean needClientAuth = false;
     private ServerSocket serverSocket;
     private Thread serverThread;
 
@@ -86,6 +87,14 @@ public class MercerShellServer {
             throw new IllegalStateException();
         }
         this.serverSocketFactory = serverSocketFactory;
+    }
+
+    public boolean getNeedClientAuth() {
+        return needClientAuth;
+    }
+
+    public void setNeedClientAuth(boolean needClientAuth) {
+        this.needClientAuth = needClientAuth;
     }
 
     public synchronized void start() throws IOException {
@@ -167,6 +176,9 @@ public class MercerShellServer {
     }
 
     protected void handleClient(Socket socket) throws IOException {
+        if (needClientAuth) {
+            ((SSLSocket) socket).setNeedClientAuth(true);
+        }
         handleClient(
                 new BufferedReader(new InputStreamReader(socket.getInputStream())),
                 new PrintStream(socket.getOutputStream(), true));
@@ -185,14 +197,9 @@ public class MercerShellServer {
     }
 
     public static void main(String[] args) throws IOException {
-        MercerShellServer server = new MercerShellServer() {
-            @Override
-            protected void handleClient(Socket socket) throws IOException {
-                ((SSLSocket) socket).setNeedClientAuth(true);
-                super.handleClient(socket);
-            }
-        };
+        MercerShellServer server = new MercerShellServer();
         server.setServerSocketFactory(SSLServerSocketFactory.getDefault());
+        server.setNeedClientAuth(true);
         server.start();
     }
 }

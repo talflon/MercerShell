@@ -22,10 +22,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.IOException;
 import java.net.Socket;
-
-import javax.net.ssl.SSLSocket;
 
 public class MainActivity extends AppCompatActivity {
     static final String LOG_TAG = "MainActivity";
@@ -38,12 +35,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         try {
             shellServer = new MercerShellServer() {
-                @Override
-                protected void handleClient(Socket socket) throws IOException {
-                    ((SSLSocket) socket).setNeedClientAuth(true);
-                    super.handleClient(socket);
-                }
-
                 @Override
                 protected void handleServerError(Throwable error) {
                     Log.e(LOG_TAG, "Server error", error);
@@ -60,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
             shellServer.setShellFactory(new AndroidMercerShellFactory(this));
             shellServer.setServerSocketFactory(
                     SslConfig.loadSSLContext(this).getServerSocketFactory());
+            shellServer.setNeedClientAuth(true);
             shellServer.start();
         } catch (Exception e) {
             Log.e(LOG_TAG, "Error starting server", e);
