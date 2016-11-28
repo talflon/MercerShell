@@ -11,5 +11,6 @@ dependencies {
     compile 'org.beanshell:bsh-commands:2.0b4'
     compile 'org.beanshell:bsh-reflect:2.0b4'
     compile 'org.mockito:mockito-core:1.10.19'
+    testCompile project(':commonTest')
     testCompile 'junit:junit-dep:4.10'
 }
