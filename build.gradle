@@ -16,11 +16,8 @@ allprojects {
         jcenter()
     }
 
-    def keystorePropertiesFile = rootProject.file('keystore.properties')
     ext.keystoreProperties = new Properties()
-    if (keystorePropertiesFile.canRead()) {
-        keystoreProperties.load(keystorePropertiesFile.newInputStream())
-    }
+    keystoreProperties.load(rootProject.file('keystore.properties').newInputStream())
 }
 
 task clean(type: Delete) {

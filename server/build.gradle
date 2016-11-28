@@ -3,11 +3,9 @@ apply plugin: 'com.github.hauner.jarTest'
 
 mainClassName = 'net.getzit.mercershell.MercerShellServer'
 
-if (!keystoreProperties.isEmpty()) {
-    applicationDefaultJvmArgs = [
-            '-Djavax.net.ssl.keyStore=' + rootProject.file(keystoreProperties['storeFile']),
-            '-Djavax.net.ssl.keyStorePassword=' + keystoreProperties['keyPassword']]
-}
+applicationDefaultJvmArgs = [
+        '-Djavax.net.ssl.keyStore=' + rootProject.file(keystoreProperties['storeFile']),
+        '-Djavax.net.ssl.keyStorePassword=' + keystoreProperties['keyPassword']]
 
 targetCompatibility = '1.7'
 sourceCompatibility = '1.7'

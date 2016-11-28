@@ -2,11 +2,9 @@ apply plugin: 'application'
 
 mainClassName = 'net.getzit.mercershell.MercerShellClient'
 
-if (!keystoreProperties.isEmpty()) {
-    applicationDefaultJvmArgs = [
-            '-Djavax.net.ssl.trustStore=' + rootProject.file(keystoreProperties['storeFile']),
-            '-Djavax.net.ssl.trustStorePassword=' + keystoreProperties['keyPassword']]
-}
+applicationDefaultJvmArgs = [
+        '-Djavax.net.ssl.trustStore=' + rootProject.file(keystoreProperties['storeFile']),
+        '-Djavax.net.ssl.trustStorePassword=' + keystoreProperties['keyPassword']]
 
 dependencies {
     compile 'org.jline:jline:3.1.0'
