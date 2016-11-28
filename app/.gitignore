@@ -1,1 +1,3 @@
 /build
+/src/main/res/raw/keystore
+/src/main/res/values/keystore.xml

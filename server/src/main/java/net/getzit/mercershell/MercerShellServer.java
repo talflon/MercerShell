@@ -31,6 +31,7 @@ import java.util.concurrent.ThreadFactory;
 
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 
 public class MercerShellServer {
     public static final int DEFAULT_PORT = 9923;
@@ -154,6 +155,12 @@ public class MercerShellServer {
                 MercerShell.defaultFactory(),
                 Executors.defaultThreadFactory(),
                 SSLServerSocketFactory.getDefault()
-        ).start();
+        ) {
+            @Override
+            protected void handleClient(Socket socket) throws IOException {
+                ((SSLSocket) socket).setNeedClientAuth(true);
+                super.handleClient(socket);
+            }
+        }.start();
     }
 }

@@ -15,6 +15,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import javax.net.ssl.SSLContext;
+
 import static org.junit.Assert.*;
 
 @RunWith(AndroidJUnit4.class)
@@ -27,9 +29,10 @@ public class MainActivityTest {
     BufferedReader in;
 
     @Before
-    public void connectToServer() throws IOException {
-        int port = mActivityRule.getActivity().getResources().getInteger(R.integer.server_port);
-        socket = new Socket("localhost", port);
+    public void connectToServer() throws Exception {
+        SSLContext sslContext = SslConfig.loadSSLContext(mActivityRule.getActivity());
+        socket = sslContext.getSocketFactory().createSocket(
+                "localhost", MercerShellServer.DEFAULT_PORT);
         out = new PrintWriter(socket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
     }

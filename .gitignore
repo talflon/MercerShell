@@ -8,4 +8,4 @@
 /captures
 .externalNativeBuild
 keystore.properties
-*.jks
+/*.p12

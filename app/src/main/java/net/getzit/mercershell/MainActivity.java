@@ -19,46 +19,72 @@ along with MercerShell.  If not, see <http://www.gnu.org/licenses/>.
 */
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.Socket;
 import java.util.concurrent.Executors;
 
-import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLSocket;
 
 import bsh.EvalError;
 
 public class MainActivity extends AppCompatActivity {
+    static final String LOG_TAG = "MainActivity";
+
     private MercerShellServer shellServer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        shellServer = new MercerShellServer(
-                getResources().getInteger(R.integer.server_port), new MercerShellFactory() {
-            @Override
-            public MercerShell createShell(BufferedReader in, PrintStream out) {
-                MercerShell shell = new MercerShell(in, out);
-                try {
-                    shell.getShell().set("activity", MainActivity.this);
-                } catch (EvalError e) {
-                    throw new Error(e);
-                }
-                return shell;
-            }
-        }, Executors.defaultThreadFactory(), ServerSocketFactory.getDefault());
         try {
+            shellServer = new MercerShellServer(
+                    getResources().getInteger(R.integer.server_port), new MercerShellFactory() {
+                @Override
+                public MercerShell createShell(BufferedReader in, PrintStream out) {
+                    MercerShell shell = new MercerShell(in, out);
+                    try {
+                        shell.getShell().set("activity", MainActivity.this);
+                    } catch (EvalError e) {
+                        throw new Error(e);
+                    }
+                    return shell;
+                }
+            }, Executors.defaultThreadFactory(), SslConfig.loadSSLContext(this).getServerSocketFactory()) {
+                @Override
+                protected void handleClient(Socket socket) throws IOException {
+                    ((SSLSocket) socket).setNeedClientAuth(true);
+                    super.handleClient(socket);
+                }
+
+                @Override
+                protected void handleServerError(Throwable error) {
+                    Log.e(LOG_TAG, "Server error", error);
+                    Toast.makeText(MainActivity.this, "Server error", Toast.LENGTH_LONG).show();
+                }
+
+                @Override
+                protected void handleClientError(Throwable error, Socket socket) {
+                    Log.e(LOG_TAG, "Client error", error);
+                    Toast.makeText(MainActivity.this, "Client error", Toast.LENGTH_LONG).show();
+                }
+            };
             shellServer.start();
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Error starting server", e);
+            Toast.makeText(this, "Error starting server", Toast.LENGTH_LONG).show();
         }
     }
 
     @Override
     protected void onDestroy() {
-        shellServer.stop();
+        if (shellServer != null) {
+            shellServer.stop();
+        }
         super.onDestroy();
     }
 }
