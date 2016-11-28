@@ -22,15 +22,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.Socket;
 import java.util.concurrent.Executors;
 
 import javax.net.ssl.SSLSocket;
-
-import bsh.EvalError;
 
 public class MainActivity extends AppCompatActivity {
     static final String LOG_TAG = "MainActivity";
@@ -43,18 +39,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         try {
             shellServer = new MercerShellServer(
-                    getResources().getInteger(R.integer.server_port), new MercerShellFactory() {
-                @Override
-                public MercerShell createShell(BufferedReader in, PrintStream out) {
-                    MercerShell shell = new MercerShell(in, out);
-                    try {
-                        shell.getShell().set("activity", MainActivity.this);
-                    } catch (EvalError e) {
-                        throw new Error(e);
-                    }
-                    return shell;
-                }
-            }, Executors.defaultThreadFactory(), SslConfig.loadSSLContext(this).getServerSocketFactory()) {
+                    getResources().getInteger(R.integer.server_port),
+                    new AndroidMercerShellFactory(this),
+                    Executors.defaultThreadFactory(),
+                    SslConfig.loadSSLContext(this).getServerSocketFactory()) {
                 @Override
                 protected void handleClient(Socket socket) throws IOException {
                     ((SSLSocket) socket).setNeedClientAuth(true);
