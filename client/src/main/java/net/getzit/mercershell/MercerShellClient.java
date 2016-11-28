@@ -31,6 +31,8 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import javax.net.ssl.SSLSocketFactory;
+
 public class MercerShellClient {
     public static final int DEFAULT_PORT = 9923;
 
@@ -123,7 +125,7 @@ public class MercerShellClient {
         Socket socket = null;
         try {
             terminal = TerminalBuilder.terminal();
-            socket = new Socket(remoteHost, port);
+            socket = SSLSocketFactory.getDefault().createSocket(remoteHost, port);
             MercerShellClient client = new MercerShellClient(
                     terminal, socket.getInputStream(), socket.getOutputStream());
             client.run();

@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 
 import javax.net.ServerSocketFactory;
+import javax.net.ssl.SSLServerSocketFactory;
 
 public class MercerShellServer {
     public static final int DEFAULT_PORT = 9923;
@@ -152,7 +153,7 @@ public class MercerShellServer {
                 DEFAULT_PORT,
                 MercerShell.defaultFactory(),
                 Executors.defaultThreadFactory(),
-                ServerSocketFactory.getDefault()
+                SSLServerSocketFactory.getDefault()
         ).start();
     }
 }
