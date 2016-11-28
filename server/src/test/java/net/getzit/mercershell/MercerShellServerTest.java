@@ -74,9 +74,7 @@ public class MercerShellServerTest {
                 };
             }
         };
-        shellServer = new MercerShellServer(
-                MercerShellServer.DEFAULT_PORT,
-                shellFactory, threadFactory, mockServerSocketFactory) {
+        shellServer = new MercerShellServer() {
             @Override
             protected void handleClientError(Throwable error, Socket socket) {
                 handleServerError(error);
@@ -87,6 +85,9 @@ public class MercerShellServerTest {
                 asyncError.compareAndSet(null, error);
             }
         };
+        shellServer.setShellFactory(shellFactory);
+        shellServer.setThreadFactory(threadFactory);
+        shellServer.setServerSocketFactory(mockServerSocketFactory);
     }
 
     @After

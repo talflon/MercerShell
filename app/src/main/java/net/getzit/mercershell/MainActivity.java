@@ -24,7 +24,6 @@ import android.widget.Toast;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.Executors;
 
 import javax.net.ssl.SSLSocket;
 
@@ -38,11 +37,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         try {
-            shellServer = new MercerShellServer(
-                    getResources().getInteger(R.integer.server_port),
-                    new AndroidMercerShellFactory(this),
-                    Executors.defaultThreadFactory(),
-                    SslConfig.loadSSLContext(this).getServerSocketFactory()) {
+            shellServer = new MercerShellServer() {
                 @Override
                 protected void handleClient(Socket socket) throws IOException {
                     ((SSLSocket) socket).setNeedClientAuth(true);
@@ -61,6 +56,10 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Client error", Toast.LENGTH_LONG).show();
                 }
             };
+            shellServer.setPort(getResources().getInteger(R.integer.server_port));
+            shellServer.setShellFactory(new AndroidMercerShellFactory(this));
+            shellServer.setServerSocketFactory(
+                    SslConfig.loadSSLContext(this).getServerSocketFactory());
             shellServer.start();
         } catch (Exception e) {
             Log.e(LOG_TAG, "Error starting server", e);

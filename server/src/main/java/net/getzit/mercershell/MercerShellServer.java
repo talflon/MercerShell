@@ -36,21 +36,56 @@ import javax.net.ssl.SSLSocket;
 public class MercerShellServer {
     public static final int DEFAULT_PORT = 9923;
 
-    private final int port;
-    private final MercerShellFactory shellFactory;
-    private final ThreadFactory threadFactory;
-    private final ServerSocketFactory serverSocketFactory;
-    private final Set<Thread> clientThreads;
+    private final Set<Thread> clientThreads = new HashSet<>();
+    private int port = DEFAULT_PORT;
+    private MercerShellFactory shellFactory = MercerShell.defaultFactory();
+    private ThreadFactory threadFactory = Executors.defaultThreadFactory();
+    private ServerSocketFactory serverSocketFactory = ServerSocketFactory.getDefault();
     private ServerSocket serverSocket;
     private Thread serverThread;
 
-    public MercerShellServer(int port, MercerShellFactory shellFactory, ThreadFactory threadFactory,
-                             ServerSocketFactory serverSocketFactory) {
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        if (serverSocket != null) {
+            throw new IllegalStateException();
+        }
         this.port = port;
+    }
+
+    public MercerShellFactory getShellFactory() {
+        return shellFactory;
+    }
+
+    public void setShellFactory(MercerShellFactory shellFactory) {
+        if (serverSocket != null) {
+            throw new IllegalStateException();
+        }
         this.shellFactory = shellFactory;
+    }
+
+    public ThreadFactory getThreadFactory() {
+        return threadFactory;
+    }
+
+    public void setThreadFactory(ThreadFactory threadFactory) {
+        if (serverSocket != null) {
+            throw new IllegalStateException();
+        }
         this.threadFactory = threadFactory;
+    }
+
+    public ServerSocketFactory getServerSocketFactory() {
+        return serverSocketFactory;
+    }
+
+    public void setServerSocketFactory(ServerSocketFactory serverSocketFactory) {
+        if (serverSocket != null) {
+            throw new IllegalStateException();
+        }
         this.serverSocketFactory = serverSocketFactory;
-        clientThreads = new HashSet<>();
     }
 
     public synchronized void start() throws IOException {
@@ -150,17 +185,14 @@ public class MercerShellServer {
     }
 
     public static void main(String[] args) throws IOException {
-        new MercerShellServer(
-                DEFAULT_PORT,
-                MercerShell.defaultFactory(),
-                Executors.defaultThreadFactory(),
-                SSLServerSocketFactory.getDefault()
-        ) {
+        MercerShellServer server = new MercerShellServer() {
             @Override
             protected void handleClient(Socket socket) throws IOException {
                 ((SSLSocket) socket).setNeedClientAuth(true);
                 super.handleClient(socket);
             }
-        }.start();
+        };
+        server.setServerSocketFactory(SSLServerSocketFactory.getDefault());
+        server.start();
     }
 }
