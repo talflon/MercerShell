@@ -26,6 +26,17 @@ android {
     }
 }
 
+task copyKeystoreResources {
+    def valuesFile = file('src/main/res/values/keystore.xml')
+    def keystoreFile = file('src/main/res/raw/keystore')
+    valuesFile.text = """<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="keystore_password">${keystoreProperties['storePassword']}</string>
+</resources>"""
+    keystoreFile.bytes = rootProject.file(keystoreProperties['storeFile']).bytes
+}
+preBuild.dependsOn copyKeystoreResources
+
 dependencies {
     compile project(':server')
     compile 'com.crittercism.dexmaker:dexmaker:1.4'
