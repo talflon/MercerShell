@@ -15,7 +15,7 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class MercerShellClient {
-    public static final int DEFAULT_PORT = 12345;
+    public static final int DEFAULT_PORT = 9923;
 
     private final Terminal terminal;
     private final InputStream remoteInput;

@@ -75,7 +75,8 @@ public class MercerShellServerTest {
             }
         };
         shellServer = new MercerShellServer(
-                12345, shellFactory, threadFactory, mockServerSocketFactory) {
+                MercerShellServer.DEFAULT_PORT,
+                shellFactory, threadFactory, mockServerSocketFactory) {
             @Override
             protected void handleClientError(Throwable error, Socket socket) {
                 handleServerError(error);

@@ -32,7 +32,7 @@ import java.util.concurrent.ThreadFactory;
 import javax.net.ServerSocketFactory;
 
 public class MercerShellServer {
-    public static final int DEFAULT_PORT = 12345;
+    public static final int DEFAULT_PORT = 9923;
 
     private final int port;
     private final MercerShellFactory shellFactory;
