@@ -10,13 +10,13 @@ import static org.junit.Assert.*;
 public class MercerShellTest extends MercerShellTestHarness {
     @Test
     public void testAddition() throws Exception {
-        testSingleCommand("1+2", "3");
+        term.assertResponse("1+2", "3");
     }
 
     @Test
     public void testMultipleCommands() throws Exception {
-        testSingleCommand("\"hi\"", "hi");
-        testSingleCommand("3.5 + 4.5", "8.0");
+        term.assertResponse("\"hi\"", "hi");
+        term.assertResponse("3.5 + 4.5", "8.0");
     }
 
     public static class TestPojo {
@@ -35,7 +35,7 @@ public class MercerShellTest extends MercerShellTestHarness {
 
     @Test
     public void testConstructPojo() throws Exception {
-        testSingleCommand(
+        term.assertResponse(
                 "new net.getzit.mercershell.MercerShellTest.TestPojo(8, \"x\").publicField",
                 "8");
     }
@@ -45,32 +45,32 @@ public class MercerShellTest extends MercerShellTestHarness {
         TestPojo pojo = new TestPojo();
         shell.getShell().set("pojo", pojo);
         pojo.publicField = 13;
-        testSingleCommand("pojo.publicField", "13");
+        term.assertResponse("pojo.publicField", "13");
     }
 
     @Test
     public void testPojoPublicFieldSet() throws Exception {
         TestPojo pojo = new TestPojo();
         shell.getShell().set("pojo", pojo);
-        runSingleCommand("pojo.publicField = 43210");
+        term.ignoreResponse("pojo.publicField = 43210");
         assertEquals(43210, pojo.publicField);
     }
 
     @Test
     public void testPojoPrivateFieldGet() throws Exception {
-        shellIn.println("setAccessibility(true)");
+        term.sendCommand("setAccessibility(true)");
         TestPojo pojo = new TestPojo();
         shell.getShell().set("pojo", pojo);
         pojo.privateField = "oi";
-        testSingleCommand("pojo.privateField", "oi");
+        term.assertResponse("pojo.privateField", "oi");
     }
 
     @Test
     public void testPojoPrivateFieldSet() throws Exception {
-        shellIn.println("setAccessibility(true)");
+        term.sendCommand("setAccessibility(true)");
         TestPojo pojo = new TestPojo();
         shell.getShell().set("pojo", pojo);
-        runSingleCommand("pojo.privateField = \"stuff\"");
+        term.ignoreResponse("pojo.privateField = \"stuff\"");
         assertEquals("stuff", pojo.privateField);
     }
 
@@ -79,14 +79,14 @@ public class MercerShellTest extends MercerShellTestHarness {
         TestPojo pojo = new TestPojo();
         shell.getShell().set("pojo", pojo);
         pojo.publicField = -100;
-        testSingleCommand("pojo.publicFieldPublic", "-100");
+        term.assertResponse("pojo.publicFieldPublic", "-100");
     }
 
     @Test
     public void testPojoPublicBeanPropSet() throws Exception {
         TestPojo pojo = new TestPojo();
         shell.getShell().set("pojo", pojo);
-        runSingleCommand("pojo.publicFieldPublic = 5");
+        term.ignoreResponse("pojo.publicFieldPublic = 5");
         assertEquals(5, pojo.publicField);
     }
 
@@ -94,133 +94,124 @@ public class MercerShellTest extends MercerShellTestHarness {
     public void testLocalVariableExternalSet() throws Exception {
         final double value = 13.5;
         shell.getShell().set("x", value);
-        testSingleCommand("x", Double.toString(value));
+        term.assertResponse("x", Double.toString(value));
     }
 
     @Test
     public void testLocalVariableExternalGet() throws Exception {
-        runSingleCommand("y = -1");
+        term.ignoreResponse("y = -1");
         assertEquals(-1, shell.getShell().get("y"));
     }
 
     @Test
     public void testPrint() throws Exception {
-        shellIn.println("print(\"hello\");");
-        assertOutput("hello");
+        term.assertResponse("print(\"hello\");", "hello");
     }
 
     @Test
     public void testPrintNoJunkValue() throws Exception {
-        shellIn.println("print(\"hello\");");
-        assertOutput("hello");
-        shellIn.println("12");
-        assertOutput("12");
+        term.assertResponse("print(\"hello\");", "hello");
+        term.assertResponse("12", "12");
     }
 
     @Test
     public void testSwallowNull() throws Exception {
-        shellIn.println("null");
-        shellIn.println("\"Q\"");
-        assertOutput("Q");
+        term.sendCommand("null");
+        term.assertResponse("\"Q\"", "Q");
     }
 
     @Test
     public void testPrintNull() throws Exception {
-        shellIn.println("print(null)");
-        assertOutput("null");
+        term.assertResponse("print(null)", "null");
     }
 
     @Test
     public void testScriptedMethod() throws Exception {
-        shellIn.println("long sub(long x, long y) { return x - y; }");
-        testSingleCommand("sub(15, 4)", "11");
+        term.sendCommand("long sub(long x, long y) { return x - y; }");
+        term.assertResponse("sub(15, 4)", "11");
     }
 
     @Test
     public void testImportClass() throws Exception {
-        shellIn.println("import java.util.concurrent.atomic.AtomicInteger");
-        runSingleCommand("ai = new AtomicInteger(4)");
+        term.sendCommand("import java.util.concurrent.atomic.AtomicInteger");
+        term.ignoreResponse("ai = new AtomicInteger(4)");
         assertEquals(4, ((AtomicInteger) shell.getShell().get("ai")).get());
     }
 
     @Test
     public void testImplementInterface() throws Exception {
-        shellIn.println("import java.util.concurrent.Callable");
-        runSingleCommand("callable = new Callable() { public String call() { return \"yes\"; } }");
+        term.sendCommand("import java.util.concurrent.Callable");
+        term.ignoreResponse("callable = new Callable() { public String call() { return \"yes\"; } }");
         assertEquals("yes", ((Callable) shell.getShell().get("callable")).call());
     }
 
     @Test
     public void testScriptedObject() throws Exception {
-        shellIn.println("obj() { x = 3; method() { return x; } return this; }");
-        testSingleCommand("obj().method()", "3");
+        term.sendCommand("obj() { x = 3; method() { return x; } return this; }");
+        term.assertResponse("obj().method()", "3");
     }
 
     @Test
     public void testMockitoMockWhen() throws Exception {
-        shellIn.println("import org.mockito.Mockito");
-        runSingleCommand("list = Mockito.mock(List.class)");
-        runSingleCommand("Mockito.when(list.size()).thenReturn(9)");
-        testSingleCommand("list.size()", "9");
+        term.sendCommand("import org.mockito.Mockito");
+        term.ignoreResponse("list = Mockito.mock(List.class)");
+        term.ignoreResponse("Mockito.when(list.size()).thenReturn(9)");
+        term.assertResponse("list.size()", "9");
     }
 
     @Test
     public void testMultiLineCall() throws Exception {
-        shellIn.println(MercerShell.MULTILINE_START);
-        shellIn.println("Math.pow(");
-        shellIn.println("2.0,");
-        shellIn.println("4.0)");
-        shellIn.println(MercerShell.MULTILINE_END);
-        assertOutput("16.0");
+        term.sendCommand(MercerShell.MULTILINE_START);
+        term.sendCommand("Math.pow(");
+        term.sendCommand("2.0,");
+        term.sendCommand("4.0)");
+        term.assertResponse(MercerShell.MULTILINE_END, "16.0");
     }
 
     @Test
     public void testMultiLineSet() throws Exception {
-        shellIn.println(MercerShell.MULTILINE_START);
-        shellIn.println("x = ");
-        shellIn.println("  17 ");
-        shellIn.println(MercerShell.MULTILINE_END);
-        getOutput();
+        term.sendCommand(MercerShell.MULTILINE_START);
+        term.sendCommand("x = ");
+        term.sendCommand("  17 ");
+        term.ignoreResponse(MercerShell.MULTILINE_END);
         assertEquals(17, shell.getShell().get("x"));
     }
 
     @Test
     public void testMultiLineMult() throws Exception {
-        shellIn.println(MercerShell.MULTILINE_START);
-        shellIn.println("8");
-        shellIn.println("*3");
-        shellIn.println(MercerShell.MULTILINE_END);
-        assertOutput("24");
+        term.sendCommand(MercerShell.MULTILINE_START);
+        term.sendCommand("8");
+        term.sendCommand("*3");
+        term.assertResponse(MercerShell.MULTILINE_END, "24");
     }
 
     @Test
     public void testLastResult() throws Exception {
-        runSingleCommand("15");
+        term.ignoreResponse("15");
         assertEquals(15, shell.getShell().get(MercerShell.LAST_RESULT_VAR));
-        runSingleCommand("\"abc\" + 123");
+        term.ignoreResponse("\"abc\" + 123");
         assertEquals("abc123", shell.getShell().get(MercerShell.LAST_RESULT_VAR));
     }
 
     @Test
     public void testMultilineCancel() throws Exception {
-        shellIn.println(MercerShell.MULTILINE_START);
-        shellIn.println("8 + ");
-        shellIn.println(MercerShell.MULTILINE_CANCEL);
-        testSingleCommand("5 - 1", "4");
+        term.sendCommand(MercerShell.MULTILINE_START);
+        term.sendCommand("8 + ");
+        term.sendCommand(MercerShell.MULTILINE_CANCEL);
+        term.assertResponse("5 - 1", "4");
     }
 
     @Test
     public void testMultilineAfterCancel() throws Exception {
-        shellIn.println(MercerShell.MULTILINE_START);
-        shellIn.println("abcdefg");
-        shellIn.println("hijklmnop");
-        shellIn.println(MercerShell.MULTILINE_CANCEL);
-        runSingleCommand("0");
-        shellIn.println(MercerShell.MULTILINE_START);
-        shellIn.println("print(");
-        shellIn.println("\"this\"");
-        shellIn.println(")");
-        shellIn.println(MercerShell.MULTILINE_END);
-        assertOutput("this");
+        term.sendCommand(MercerShell.MULTILINE_START);
+        term.sendCommand("abcdefg");
+        term.sendCommand("hijklmnop");
+        term.sendCommand(MercerShell.MULTILINE_CANCEL);
+        term.ignoreResponse("0");
+        term.sendCommand(MercerShell.MULTILINE_START);
+        term.sendCommand("print(");
+        term.sendCommand("\"this\"");
+        term.sendCommand(")");
+        term.assertResponse(MercerShell.MULTILINE_END, "this");
     }
 }

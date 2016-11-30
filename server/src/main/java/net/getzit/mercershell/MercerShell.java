@@ -28,6 +28,7 @@ public class MercerShell {
     public static final String MULTILINE_END = MULTILINE_START;
     public static final String MULTILINE_CANCEL = "#-";
     public static final String LAST_RESULT_VAR = "RESULT";
+    public static final String PROMPT = "> ";
 
     protected final BufferedReader in;
     protected final PrintStream out;
@@ -46,6 +47,7 @@ public class MercerShell {
 
     public void readLoop() throws IOException {
         while (!Thread.interrupted()) {
+            displayPrompt();
             if (out.checkError()) {
                 throw new IOException("Error in output stream");
             }
@@ -77,6 +79,10 @@ public class MercerShell {
                 displayError(t);
             }
         }
+    }
+
+    protected void displayPrompt() {
+        out.print(PROMPT);
     }
 
     protected void displayResult(Object result) {

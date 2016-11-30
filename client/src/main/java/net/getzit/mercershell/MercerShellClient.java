@@ -84,7 +84,7 @@ public class MercerShellClient {
         try {
             while (!writer.checkError()) {
                 try {
-                    writer.println(lineReader.readLine("> "));
+                    writer.println(lineReader.readLine());
                 } catch (UserInterruptException e) {
                     /* ignore */
                 }

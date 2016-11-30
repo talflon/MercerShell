@@ -9,11 +9,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import javax.net.ssl.SSLContext;
 
@@ -25,23 +25,26 @@ public class MainActivityTest {
     public ActivityTestRule mActivityRule = new ActivityTestRule<>(MainActivity.class);
 
     Socket socket;
-    PrintWriter out;
-    BufferedReader in;
+    ShellTester term;
+    ExecutorService executor;
 
     @Before
     public void connectToServer() throws Exception {
         SSLContext sslContext = SslConfig.loadSSLContext(mActivityRule.getActivity());
         socket = sslContext.getSocketFactory().createSocket(
                 "localhost", MercerShellServer.DEFAULT_PORT);
-        out = new PrintWriter(socket.getOutputStream(), true);
-        in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        executor = Executors.newCachedThreadPool();
+        term = new ShellTester(
+                socket.getInputStream(), socket.getOutputStream(), executor, MercerShell.PROMPT);
     }
 
     @After
-    public void disconnectFromServer() {
+    public void disconnectFromServer() throws InterruptedException {
+        boolean outputError = false;
         if (socket != null) {
-            if (out != null) {
-                assertFalse("Error in output stream", out.checkError());
+            if (term != null) {
+                outputError = term.close();
+                Thread.yield();
             }
             try {
                 socket.close();
@@ -49,24 +52,24 @@ public class MainActivityTest {
                 /* ignore */
             }
         }
+        executor.shutdownNow();
+        assertTrue("Something still running", executor.awaitTermination(2, TimeUnit.SECONDS));
+        assertFalse("Error in output stream", outputError);
     }
 
     @Test
     public void shellRunning() throws Exception {
-        out.println("1+2");
-        assertEquals("3", in.readLine());
+        term.assertResponse("1+2", "3");
     }
 
     @Test
     public void testGetApplication() throws Exception {
-        out.println("print(activity.application.getClass().simpleName)");
-        assertEquals("Application", in.readLine());
+        term.assertResponse("print(activity.application.getClass().simpleName)", "Application");
     }
 
     @Test
     public void testGetResourceString() throws Exception {
-        out.println("import net.getzit.mercershell.R");
-        out.println("activity.getString(R.string.app_name)");
-        assertEquals(mActivityRule.getActivity().getString(R.string.app_name), in.readLine());
+        term.sendCommand("import net.getzit.mercershell.R");
+        term.assertResponse("activity.getString(R.string.app_name)", mActivityRule.getActivity().getString(R.string.app_name));
     }
 }

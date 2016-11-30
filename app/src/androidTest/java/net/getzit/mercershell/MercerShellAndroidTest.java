@@ -9,8 +9,8 @@ import static org.junit.Assert.*;
 public class MercerShellAndroidTest extends MercerShellTestHarness {
     @Test
     public void testImplementAndroidInterface() throws Exception {
-        shellIn.println("import android.text.*");
-        runSingleCommand("filter = new InputFilter() {"
+        term.sendCommand("import android.text.*");
+        term.ignoreResponse("filter = new InputFilter() {"
                 + " public CharSequence filter(CharSequence source, int start, int end,"
                 + " Spanned dest, int dstart, int dend) {"
                 + " return source; } }");
