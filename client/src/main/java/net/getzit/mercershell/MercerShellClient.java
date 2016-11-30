@@ -39,6 +39,7 @@ public class MercerShellClient {
     private final Terminal terminal;
     private final InputStream remoteInput;
     private final OutputStream remoteOutput;
+    private volatile boolean closing = false;
 
     public MercerShellClient(Terminal terminal,
                              InputStream remoteInput, OutputStream remoteOutput) {
@@ -57,6 +58,10 @@ public class MercerShellClient {
         consoleThread.start();
         try {
             feedInput();
+        } catch (IOException e) {
+            if (!closing) {
+                throw e;
+            }
         } finally {
             consoleThread.interrupt();
         }
@@ -92,6 +97,7 @@ public class MercerShellClient {
         } catch (EndOfFileException e) {
             /* just finish */
         } finally {
+            closing = true;
             writer.close();
         }
     }
